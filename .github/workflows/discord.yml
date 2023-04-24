@@ -1,0 +1,29 @@
+name: discord notify
+on:
+  issues:
+    types: [opened, edited, closed, reopened, assigned, unassigned, labeled, unlabeled]
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the branch name
+        id: get-branch
+        run: echo "branch=$(echo ${{ github.ref }} | tr '/' '\n' | tail -1)" >> $GITHUB_OUTPUT
+
+      - name: discord-action
+        uses: sebastianpopp/discord-action@v2.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          message: |
+            :technologist: *${{ github.event.sender.login }}*
+            **${{ github.event.pull_request.title }}${{ github.event.issue.title }}${{ github.event.head_commit.message }}**
+            > *`${{ github.event_name }}`* in `${{ steps.get-branch.outputs.branch }}` :round_pushpin:
+            > of `${{ github.repository }}` :ice_cube:
+  
+
+
